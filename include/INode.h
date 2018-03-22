@@ -32,6 +32,7 @@
 
 #include <cstdint>
 #include <system_error>
+#include "android.h"
 
 namespace CryptoNote {
 
