@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-wget http://coinmine.network/blockchain.raw
+wget http://downloads.myntnote.org/blockchain/blockchain.raw
