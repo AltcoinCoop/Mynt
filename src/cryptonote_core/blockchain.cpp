@@ -59,7 +59,7 @@
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "blockchain"
-
+#define MAINNET_DIFF_ATTACK_HEIGHT  ((uint64_t)(123000))
 #define FIND_BLOCKCHAIN_SUPPLEMENT_MAX_SIZE (100*1024*1024) // 100 MB
 
 using namespace crypto;
@@ -734,6 +734,10 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> difficulties;
   auto height = m_db->height();
+   // Reset network hashrate to 18.0 KHz when height >= attack height + difficulty window
+  if (!m_testnet && (uint64_t)height >= MAINNET_DIFF_ATTACK_HEIGHT && (uint64_t)height <= MAINNET_DIFF_ATTACK_HEIGHT + (uint64_t)DIFFICULTY_BLOCKS_COUNT){
+    return (difficulty_type) 2400000;
+  }
   // ND: Speedup
   // 1. Keep a list of the last 735 (or less) blocks that is used to compute difficulty,
   //    then when the next block difficulty is queried, push the latest height data and
