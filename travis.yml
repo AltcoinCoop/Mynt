@@ -6,7 +6,7 @@ matrix:
   include:
   
   #
-  # Monero release-all
+  # Mynt release-all
   #
   - os: linux
     compiler:
