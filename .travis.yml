@@ -56,7 +56,7 @@ matrix:
       env:
         - CMAKE_CXX_COMPILER=g++-5
         - CMAKE_C_COMPILER=gcc-5
-        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ARCH=30 -DOpenCL_ENABLE=OFF"
+        #- XMRSTAK_CMAKE_FLAGS="-DCUDA_ARCH=30 -DOpenCL_ENABLE=OFF"
 
     - os: linux
       compiler: gcc
@@ -71,7 +71,7 @@ matrix:
       env:
         - CMAKE_CXX_COMPILER=g++-6
         - CMAKE_C_COMPILER=gcc-6
-        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
+        #- XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
 
     # test with disabled HWLOC, MICROHTTPD, OpenSSL and no accelerators
     - os: linux
@@ -87,7 +87,7 @@ matrix:
       env:
         - CMAKE_CXX_COMPILER=g++-6
         - CMAKE_C_COMPILER=gcc-6
-        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF -DHWLOC_ENABLE=OFF -DOpenSSL_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF"
+        #- XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF -DHWLOC_ENABLE=OFF -DOpenSSL_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF"
 
     - os: linux
       compiler: gcc
@@ -102,18 +102,16 @@ matrix:
       env:
         - CMAKE_CXX_COMPILER=g++-7
         - CMAKE_C_COMPILER=gcc-7
-        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
 
     - os: osx
       compiler: gcc
-      env:
-        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
+      # env:
 
 before_install:
   - if [ $TRAVIS_OS_NAME = osx ] ; then
       brew update;
     fi
-  - export PATH=$CUDA_ROOT/bin:$PATH
+  #- export PATH=$CUDA_ROOT/bin:$PATH
 
 install:
 
@@ -122,7 +120,7 @@ install:
       brew install jmuncaster/header-only/cppzmq gcc@5 cmake pkg-config boost@1.59 boost git openssl@1.1 zmqpp zmq unbound libsodium miniupnpc libunwind-headers xz readline ldns expat doxygen graphviz;
       cmake -DMICROHTTPD_ENABLE=OFF -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl ${XMRSTAK_CMAKE_FLAGS} .;
     else
-      sudo apt-get install libboost-all-dev
+      #sudo apt-get install libboost-all-dev
       cmake -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} ${XMRSTAK_CMAKE_FLAGS} .;
     fi;
 script:  
