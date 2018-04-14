@@ -110,14 +110,12 @@ before_install:
 install:
 
   # CUDA
-  - brew install gcc@5 cmake pkg-config boost@1.59 boost git openssl@1.1 zmqpp zmq unbound libsodium miniupnpc libunwind-headers xz readline ldns expat doxygen graphviz
-
-script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
-      brew install hwloc;
+      brew install gcc@5 cmake pkg-config boost@1.59 boost git openssl@1.1 zmqpp zmq unbound libsodium miniupnpc libunwind-headers xz readline ldns expat doxygen graphviz;
       cmake -DMICROHTTPD_ENABLE=OFF -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl ${XMRSTAK_CMAKE_FLAGS} .;
     else
       cmake -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} ${XMRSTAK_CMAKE_FLAGS} .;
     fi;
-  - make VERBOSE=1 install
-  - ./bin/cryptonote-stak --help
+script:
+  - make release-static
+  - ./build/release/bin/myntd --help
