@@ -39,19 +39,126 @@ matrix:
       - sudo apt-get -y install libboost-{chrono,program-options,date-time,thread,system,filesystem,regex,serialization}1.58{-dev,.0}
     script:
       - make -j2 && HAVE_DOT=YES doxygen Doxyfile
-    
-    - os: osx
-    osx_image: xcode7.3
-    compiler:
-      - gcc
-      - clang
-    before_install:
-      # update brew.
-      - brew update
-    install:
-      # Install deps.
-      - brew install gcc@5 cmake pkg-config boost@1.59 boost git openssl@1.1 zmqpp zmq unbound libsodium miniupnpc libunwind-headers xz readline ldns expat doxygen graphviz
+dist: trusty
 
-    script:
-      # compile.
-      - make
+osx_image: xcode8.3
+sudo: false
+language: cpp
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/cuda
+
+addons:
+  apt:
+    packages: &default_packages
+    - build-essential
+    - cmake
+    - doxygen
+    - g++
+    - gcc
+    - clang
+    - graphviz
+    - libdb++-dev
+    - libdb-dev
+    - libgtest-dev
+    - libminiupnpc-dev
+    - libssl-dev
+    - libssl1.0.0
+    - libunbound-dev
+    - libunwind8-dev
+
+env:
+  global:
+    - CUDA_ROOT: $HOME/.cache/cuda
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-5
+            - g++-5
+      env:
+        - CMAKE_CXX_COMPILER=g++-5
+        - CMAKE_C_COMPILER=gcc-5
+        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ARCH=30 -DOpenCL_ENABLE=OFF"
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-6
+            - g++-6
+      env:
+        - CMAKE_CXX_COMPILER=g++-6
+        - CMAKE_C_COMPILER=gcc-6
+        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
+
+    # test with disabled HWLOC, MICROHTTPD, OpenSSL and no accelerators
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-6
+            - g++-6
+      env:
+        - CMAKE_CXX_COMPILER=g++-6
+        - CMAKE_C_COMPILER=gcc-6
+        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF -DHWLOC_ENABLE=OFF -DOpenSSL_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF"
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-7
+            - g++-7
+      env:
+        - CMAKE_CXX_COMPILER=g++-7
+        - CMAKE_C_COMPILER=gcc-7
+        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
+
+    - os: osx
+      compiler: gcc
+      env:
+        - XMRSTAK_CMAKE_FLAGS="-DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF"
+
+before_install:
+  - . CI/checkPRBranch
+  - if [ $TRAVIS_OS_NAME = osx ] ; then
+      brew update;
+    fi
+  - export PATH=$CUDA_ROOT/bin:$PATH
+
+install:
+
+  # CUDA
+  - brew install gcc@5 cmake pkg-config boost@1.59 boost git openssl@1.1 zmqpp zmq unbound libsodium miniupnpc libunwind-headers xz readline ldns expat doxygen graphviz
+
+script:
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      brew install hwloc;
+      cmake -DMICROHTTPD_ENABLE=OFF -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl ${XMRSTAK_CMAKE_FLAGS} .;
+    else
+      cmake -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} ${XMRSTAK_CMAKE_FLAGS} .;
+    fi;
+  - make VERBOSE=1 install
+  - ./bin/cryptonote-stak --help
